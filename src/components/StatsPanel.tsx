@@ -105,44 +105,6 @@ const StatsPanel = ({ streak, avgTasksPerDay, tasks }: StatsPanelProps) => {
           </div>
         </div>
       </div>
-
-      {/* Export Options */}
-      <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-        <h3 className="text-lg font-semibold mb-4 text-gray-200">Export Data</h3>
-        <div className="space-y-3">
-          <button 
-            onClick={() => {
-              const dataStr = JSON.stringify(tasks, null, 2);
-              const dataBlob = new Blob([dataStr], {type: 'application/json'});
-              const url = URL.createObjectURL(dataBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'productivity-data.json';
-              link.click();
-            }}
-            className="w-full px-4 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors text-sm"
-          >
-            Export as JSON
-          </button>
-          <button 
-            onClick={() => {
-              const csv = 'Date,Task,Session,Time\n' + 
-                tasks.map(task => 
-                  `${task.day},"${task.text}",${task.session},${new Date(task.timestamp).toLocaleTimeString()}`
-                ).join('\n');
-              const dataBlob = new Blob([csv], {type: 'text/csv'});
-              const url = URL.createObjectURL(dataBlob);
-              const link = document.createElement('a');
-              link.href = url;
-              link.download = 'productivity-data.csv';
-              link.click();
-            }}
-            className="w-full px-4 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors text-sm"
-          >
-            Export as CSV
-          </button>
-        </div>
-      </div>
     </div>
   );
 };

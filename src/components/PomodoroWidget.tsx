@@ -1,6 +1,6 @@
 
 import React, { useState, useEffect } from 'react';
-import { Play, Pause, Square, Settings, X, Minimize2 } from 'lucide-react';
+import { Play, Pause, Square, Settings, X, Minimize2, RotateCcw } from 'lucide-react';
 import { Task, PomodoroSettings, PomodoroState } from '@/types/productivity';
 import { playNotificationSound } from '@/utils/dataManager';
 
@@ -33,6 +33,7 @@ const PomodoroWidget = ({
   const [showSettings, setShowSettings] = useState(false);
   const [position, setPosition] = useState({ x: window.innerWidth - 320, y: 100 });
   const [isDragging, setIsDragging] = useState(false);
+  const [tempSettings, setTempSettings] = useState(settings);
 
   useEffect(() => {
     if (currentTask && !pomodoroState.currentTask) {
@@ -44,6 +45,10 @@ const PomodoroWidget = ({
       }));
     }
   }, [currentTask, settings.workDuration]);
+
+  useEffect(() => {
+    setTempSettings(settings);
+  }, [settings]);
 
   useEffect(() => {
     let interval: NodeJS.Timeout;
@@ -111,6 +116,34 @@ const PomodoroWidget = ({
     }));
   };
 
+  const resetTimer = () => {
+    setPomodoroState(prev => ({
+      ...prev,
+      isActive: false,
+      isPaused: false,
+      timeLeft: prev.isBreak ? 
+        (prev.sessionsCompleted % settings.sessionsBeforeLongBreak === 0 ? settings.longBreak : settings.shortBreak) * 60 :
+        settings.workDuration * 60,
+    }));
+  };
+
+  const saveSettings = () => {
+    onUpdateSettings(tempSettings);
+    setShowSettings(false);
+    // Reset timer with new work duration if not in break
+    if (!pomodoroState.isBreak && !pomodoroState.isActive) {
+      setPomodoroState(prev => ({
+        ...prev,
+        timeLeft: tempSettings.workDuration * 60,
+      }));
+    }
+  };
+
+  const cancelSettings = () => {
+    setTempSettings(settings);
+    setShowSettings(false);
+  };
+
   const formatTime = (seconds: number) => {
     const mins = Math.floor(seconds / 60);
     const secs = seconds % 60;
@@ -118,12 +151,14 @@ const PomodoroWidget = ({
   };
 
   const handleMouseDown = (e: React.MouseEvent) => {
+    e.preventDefault(); // Prevent text selection
     setIsDragging(true);
     const rect = e.currentTarget.getBoundingClientRect();
     const offsetX = e.clientX - rect.left;
     const offsetY = e.clientY - rect.top;
 
     const handleMouseMove = (e: MouseEvent) => {
+      e.preventDefault(); // Prevent text selection during drag
       setPosition({
         x: Math.max(0, Math.min(window.innerWidth - 300, e.clientX - offsetX)),
         y: Math.max(0, Math.min(window.innerHeight - 200, e.clientY - offsetY)),
@@ -134,7 +169,14 @@ const PomodoroWidget = ({
       setIsDragging(false);
       document.removeEventListener('mousemove', handleMouseMove);
       document.removeEventListener('mouseup', handleMouseUp);
+      // Re-enable text selection
+      document.body.style.userSelect = '';
+      document.body.style.webkitUserSelect = '';
     };
+
+    // Disable text selection during drag
+    document.body.style.userSelect = 'none';
+    document.body.style.webkitUserSelect = 'none';
 
     document.addEventListener('mousemove', handleMouseMove);
     document.addEventListener('mouseup', handleMouseUp);
@@ -144,15 +186,16 @@ const PomodoroWidget = ({
 
   return (
     <div
-      className={`fixed z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl transition-all duration-300 ${
+      className={`fixed z-50 bg-slate-800 border border-slate-600 rounded-lg shadow-2xl transition-all duration-200 select-none ${
         isMinimized ? 'w-64 h-16' : 'w-80 h-64'
       } animate-scale-in`}
       style={{ left: position.x, top: position.y }}
     >
       {/* Header */}
       <div
-        className="flex items-center justify-between p-3 border-b border-slate-600 cursor-move"
+        className="flex items-center justify-between p-3 border-b border-slate-600 cursor-move select-none"
         onMouseDown={handleMouseDown}
+        style={{ userSelect: 'none' }}
       >
         <div className="flex items-center gap-2">
           <div className={`w-3 h-3 rounded-full ${pomodoroState.isActive ? 'bg-green-500 animate-pulse' : 'bg-gray-500'}`} />
@@ -222,6 +265,12 @@ const PomodoroWidget = ({
               <Square size={16} />
             </button>
             <button
+              onClick={resetTimer}
+              className="p-2 bg-blue-600 hover:bg-blue-700 rounded-lg text-white transition-colors"
+            >
+              <RotateCcw size={16} />
+            </button>
+            <button
               onClick={() => setShowSettings(!showSettings)}
               className="p-2 bg-slate-600 hover:bg-slate-700 rounded-lg text-white transition-colors"
             >
@@ -231,13 +280,13 @@ const PomodoroWidget = ({
 
           {/* Settings Panel */}
           {showSettings && (
-            <div className="absolute top-full left-0 right-0 bg-slate-800 border border-slate-600 rounded-lg p-3 mt-1 space-y-2">
+            <div className="absolute top-full left-0 right-0 bg-slate-800 border border-slate-600 rounded-lg p-3 mt-1 space-y-3">
               <div className="flex items-center justify-between">
                 <label className="text-xs text-gray-300">Work (min)</label>
                 <input
                   type="number"
-                  value={settings.workDuration}
-                  onChange={(e) => onUpdateSettings({ ...settings, workDuration: Number(e.target.value) })}
+                  value={tempSettings.workDuration}
+                  onChange={(e) => setTempSettings({ ...tempSettings, workDuration: Number(e.target.value) })}
                   className="w-16 px-2 py-1 bg-slate-700 text-white text-xs rounded"
                   min="1"
                   max="120"
@@ -247,21 +296,46 @@ const PomodoroWidget = ({
                 <label className="text-xs text-gray-300">Short Break</label>
                 <input
                   type="number"
-                  value={settings.shortBreak}
-                  onChange={(e) => onUpdateSettings({ ...settings, shortBreak: Number(e.target.value) })}
+                  value={tempSettings.shortBreak}
+                  onChange={(e) => setTempSettings({ ...tempSettings, shortBreak: Number(e.target.value) })}
                   className="w-16 px-2 py-1 bg-slate-700 text-white text-xs rounded"
                   min="1"
                   max="30"
                 />
               </div>
               <div className="flex items-center justify-between">
+                <label className="text-xs text-gray-300">Long Break</label>
+                <input
+                  type="number"
+                  value={tempSettings.longBreak}
+                  onChange={(e) => setTempSettings({ ...tempSettings, longBreak: Number(e.target.value) })}
+                  className="w-16 px-2 py-1 bg-slate-700 text-white text-xs rounded"
+                  min="1"
+                  max="60"
+                />
+              </div>
+              <div className="flex items-center justify-between">
                 <label className="text-xs text-gray-300">Sound</label>
                 <input
                   type="checkbox"
-                  checked={settings.soundEnabled}
-                  onChange={(e) => onUpdateSettings({ ...settings, soundEnabled: e.target.checked })}
+                  checked={tempSettings.soundEnabled}
+                  onChange={(e) => setTempSettings({ ...tempSettings, soundEnabled: e.target.checked })}
                   className="w-4 h-4"
                 />
+              </div>
+              <div className="flex gap-2 pt-2">
+                <button
+                  onClick={saveSettings}
+                  className="flex-1 py-1 bg-green-600 hover:bg-green-700 rounded text-xs text-white transition-colors"
+                >
+                  Save
+                </button>
+                <button
+                  onClick={cancelSettings}
+                  className="flex-1 py-1 bg-gray-600 hover:bg-gray-700 rounded text-xs text-white transition-colors"
+                >
+                  Cancel
+                </button>
               </div>
             </div>
           )}

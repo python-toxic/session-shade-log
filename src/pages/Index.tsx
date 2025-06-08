@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TimeDisplay from '@/components/TimeDisplay';
 import TaskInput from '@/components/TaskInput';
@@ -145,6 +144,12 @@ const Index = () => {
     saveData(updatedData);
   };
 
+  const updateSessionTargets = (targets: { [sessionName: string]: number }) => {
+    const updatedData = { ...appData, sessionTargets: targets };
+    setAppData(updatedData);
+    saveData(updatedData);
+  };
+
   const exportData = (format: 'json' | 'csv') => {
     const today = new Date().toISOString().split('T')[0];
     
@@ -242,6 +247,7 @@ const Index = () => {
                 colorTheme={appData.colorTheme}
                 sessionTargets={appData.sessionTargets}
                 customSessions={appData.customSessions}
+                onUpdateTargets={updateSessionTargets}
               />
             </div>
             {!focusMode && (
