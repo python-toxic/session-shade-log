@@ -5,31 +5,83 @@ import TaskInput from '@/components/TaskInput';
 import SessionGrid from '@/components/SessionGrid';
 import MonthlyHeatmap from '@/components/MonthlyHeatmap';
 import StatsPanel from '@/components/StatsPanel';
+import MainGoal from '@/components/MainGoal';
+import PomodoroWidget from '@/components/PomodoroWidget';
+import TaskTemplates from '@/components/TaskTemplates';
 import { Task, AppData } from '@/types/productivity';
-import { loadData, saveData, getCurrentSession, calculateStats } from '@/utils/dataManager';
-import { Eye, EyeOff } from 'lucide-react';
+import { loadData, saveData, getCurrentSession, calculateStats, generateTaskId, playNotificationSound } from '@/utils/dataManager';
+import { colorThemes } from '@/utils/colorUtils';
+import { Eye, EyeOff, Palette, Settings, Download, Keyboard } from 'lucide-react';
 
 const Index = () => {
   const [appData, setAppData] = useState<AppData>({
     tasks: [],
     streak: 0,
     avgTasksPerDay: 0,
-    lastActive: new Date().toISOString().split('T')[0]
+    lastActive: new Date().toISOString().split('T')[0],
+    mainGoal: 'Focus on what matters most today',
+    customSessions: [],
+    colorTheme: colorThemes[0],
+    pomodoroSettings: {
+      workDuration: 25,
+      shortBreak: 5,
+      longBreak: 15,
+      sessionsBeforeLongBreak: 4,
+      soundEnabled: true,
+    },
+    taskTemplates: [],
+    sessionTargets: {},
   });
   const [focusMode, setFocusMode] = useState(false);
+  const [showPomodoroWidget, setShowPomodoroWidget] = useState(false);
+  const [currentPomodoroTask, setCurrentPomodoroTask] = useState<Task | null>(null);
+  const [showSettings, setShowSettings] = useState(false);
+  const [showKeyboardShortcuts, setShowKeyboardShortcuts] = useState(false);
 
   useEffect(() => {
     const data = loadData();
     setAppData(data);
   }, []);
 
+  // Keyboard shortcuts
+  useEffect(() => {
+    const handleKeyDown = (e: KeyboardEvent) => {
+      if (e.ctrlKey || e.metaKey) {
+        switch (e.key) {
+          case 'Enter':
+            e.preventDefault();
+            document.querySelector('input[placeholder*="What needs"]')?.focus();
+            break;
+          case 'f':
+            e.preventDefault();
+            setFocusMode(!focusMode);
+            break;
+          case 'p':
+            e.preventDefault();
+            setShowPomodoroWidget(!showPomodoroWidget);
+            break;
+          case '/':
+            e.preventDefault();
+            setShowKeyboardShortcuts(!showKeyboardShortcuts);
+            break;
+        }
+      }
+    };
+
+    document.addEventListener('keydown', handleKeyDown);
+    return () => document.removeEventListener('keydown', handleKeyDown);
+  }, [focusMode, showPomodoroWidget, showKeyboardShortcuts]);
+
   const addTask = (taskText: string) => {
     const now = new Date();
     const newTask: Task = {
+      id: generateTaskId(),
       text: taskText,
       timestamp: now.toISOString(),
-      session: getCurrentSession(now),
-      day: now.toISOString().split('T')[0]
+      session: getCurrentSession(now, appData.customSessions),
+      day: now.toISOString().split('T')[0],
+      pomodoroTime: 0,
+      completed: false,
     };
 
     const updatedTasks = [...appData.tasks, newTask];
@@ -37,11 +89,12 @@ const Index = () => {
       ...appData,
       tasks: updatedTasks,
       ...calculateStats(updatedTasks),
-      lastActive: newTask.day
+      lastActive: newTask.day,
     };
 
     setAppData(updatedData);
     saveData(updatedData);
+    playNotificationSound(appData.pomodoroSettings.soundEnabled);
   };
 
   const deleteTask = (taskIndex: number) => {
@@ -49,11 +102,72 @@ const Index = () => {
     const updatedData = {
       ...appData,
       tasks: updatedTasks,
-      ...calculateStats(updatedTasks)
+      ...calculateStats(updatedTasks),
     };
 
     setAppData(updatedData);
     saveData(updatedData);
+  };
+
+  const startPomodoroForTask = (task: Task) => {
+    setCurrentPomodoroTask(task);
+    setShowPomodoroWidget(true);
+  };
+
+  const updateTaskPomodoroTime = (taskId: string, pomodoroTime: number) => {
+    const updatedTasks = appData.tasks.map(task => 
+      task.id === taskId 
+        ? { ...task, pomodoroTime: (task.pomodoroTime || 0) + pomodoroTime }
+        : task
+    );
+    
+    const updatedData = { ...appData, tasks: updatedTasks };
+    setAppData(updatedData);
+    saveData(updatedData);
+  };
+
+  const updateMainGoal = (goal: string) => {
+    const updatedData = { ...appData, mainGoal: goal };
+    setAppData(updatedData);
+    saveData(updatedData);
+  };
+
+  const updateColorTheme = (theme: typeof colorThemes[0]) => {
+    const updatedData = { ...appData, colorTheme: theme };
+    setAppData(updatedData);
+    saveData(updatedData);
+  };
+
+  const updateTaskTemplates = (templates: string[]) => {
+    const updatedData = { ...appData, taskTemplates: templates };
+    setAppData(updatedData);
+    saveData(updatedData);
+  };
+
+  const exportData = (format: 'json' | 'csv') => {
+    const today = new Date().toISOString().split('T')[0];
+    
+    if (format === 'json') {
+      const dataStr = JSON.stringify(appData, null, 2);
+      const dataBlob = new Blob([dataStr], { type: 'application/json' });
+      const url = URL.createObjectURL(dataBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `productivity-data-${today}.json`;
+      link.click();
+    } else {
+      const csvHeaders = 'Date,Task,Session,Pomodoro Time (min),Completed\n';
+      const csvData = appData.tasks.map(task => 
+        `${task.day},${task.text.replace(/,/g, ';')},${task.session},${task.pomodoroTime || 0},${task.completed || false}`
+      ).join('\n');
+      
+      const csvBlob = new Blob([csvHeaders + csvData], { type: 'text/csv' });
+      const url = URL.createObjectURL(csvBlob);
+      const link = document.createElement('a');
+      link.href = url;
+      link.download = `productivity-tasks-${today}.csv`;
+      link.click();
+    }
   };
 
   const getTodaysTasks = () => {
@@ -65,12 +179,34 @@ const Index = () => {
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white p-4">
       <div className="max-w-6xl mx-auto">
         {/* Header */}
-        <div className="flex items-center justify-between mb-8">
+        <div className={`flex items-center justify-between mb-8 focus-mode-transition ${
+          focusMode ? 'animate-slide-in-center' : 'animate-fade-in'
+        }`}>
           <TimeDisplay />
           <div className="flex items-center gap-4">
+            <TaskTemplates 
+              templates={appData.taskTemplates}
+              onAddTask={addTask}
+              onUpdateTemplates={updateTaskTemplates}
+            />
+            <button
+              onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
+              title="Keyboard Shortcuts (Ctrl+/)"
+            >
+              <Keyboard size={16} />
+              <span className="text-sm hidden sm:inline">Shortcuts</span>
+            </button>
+            <button
+              onClick={() => setShowSettings(!showSettings)}
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
+            >
+              <Settings size={16} />
+              <span className="text-sm hidden sm:inline">Settings</span>
+            </button>
             <button
               onClick={() => setFocusMode(!focusMode)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
             >
               {focusMode ? <Eye size={16} /> : <EyeOff size={16} />}
               <span className="text-sm">{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
@@ -78,18 +214,45 @@ const Index = () => {
           </div>
         </div>
 
+        {/* Main Goal */}
+        <div className={`focus-mode-transition ${focusMode ? 'animate-slide-in-center' : ''}`}>
+          <MainGoal goal={appData.mainGoal} onUpdate={updateMainGoal} />
+        </div>
+
         {/* Main Content */}
-        <div className="grid grid-cols-1 lg:grid-cols-3 gap-8">
+        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 focus-mode-transition ${
+          focusMode ? 'lg:grid-cols-2' : ''
+        }`}>
           {/* Left Column - Task Input and Session Grid */}
-          <div className="lg:col-span-2 space-y-6">
-            <TaskInput onAddTask={addTask} tasks={getTodaysTasks()} onDeleteTask={deleteTask} />
-            <SessionGrid tasks={getTodaysTasks()} />
-            {!focusMode && <MonthlyHeatmap tasks={appData.tasks} />}
+          <div className={`space-y-6 focus-mode-transition ${
+            focusMode ? 'lg:col-span-2 animate-slide-in-center' : 'lg:col-span-2'
+          }`}>
+            <div className="animate-pop-in">
+              <TaskInput 
+                onAddTask={addTask} 
+                tasks={getTodaysTasks()} 
+                onDeleteTask={deleteTask}
+                onStartPomodoro={startPomodoroForTask}
+              />
+            </div>
+            <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
+              <SessionGrid 
+                tasks={getTodaysTasks()} 
+                colorTheme={appData.colorTheme}
+                sessionTargets={appData.sessionTargets}
+                customSessions={appData.customSessions}
+              />
+            </div>
+            {!focusMode && (
+              <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
+                <MonthlyHeatmap tasks={appData.tasks} />
+              </div>
+            )}
           </div>
 
           {/* Right Column - Stats Panel */}
           {!focusMode && (
-            <div className="lg:col-span-1">
+            <div className="lg:col-span-1 animate-pop-in" style={{ animationDelay: '0.3s' }}>
               <StatsPanel 
                 streak={appData.streak}
                 avgTasksPerDay={appData.avgTasksPerDay}
@@ -98,7 +261,117 @@ const Index = () => {
             </div>
           )}
         </div>
+
+        {/* Settings Panel */}
+        {showSettings && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
+            <div className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+              <h3 className="text-lg font-semibold mb-4">Settings</h3>
+              
+              <div className="space-y-4">
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Color Theme</label>
+                  <div className="grid grid-cols-3 gap-2">
+                    {colorThemes.map((theme) => (
+                      <button
+                        key={theme.name}
+                        onClick={() => updateColorTheme(theme)}
+                        className={`p-3 rounded-lg border-2 transition-all ${
+                          appData.colorTheme.name === theme.name 
+                            ? 'border-blue-500 bg-slate-700' 
+                            : 'border-slate-600 hover:border-slate-500'
+                        }`}
+                      >
+                        <div 
+                          className="w-full h-4 rounded mb-1"
+                          style={{ backgroundColor: `hsl(${theme.baseHue}, 70%, 50%)` }}
+                        />
+                        <div className="text-xs">{theme.name}</div>
+                      </button>
+                    ))}
+                  </div>
+                </div>
+                
+                <div>
+                  <label className="block text-sm font-medium text-gray-300 mb-2">Export Data</label>
+                  <div className="flex gap-2">
+                    <button
+                      onClick={() => exportData('json')}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                    >
+                      <Download size={16} />
+                      JSON
+                    </button>
+                    <button
+                      onClick={() => exportData('csv')}
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                    >
+                      <Download size={16} />
+                      CSV
+                    </button>
+                  </div>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowSettings(false)}
+                className="w-full mt-6 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
+
+        {/* Keyboard Shortcuts Modal */}
+        {showKeyboardShortcuts && (
+          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
+            <div className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+              <h3 className="text-lg font-semibold mb-4">Keyboard Shortcuts</h3>
+              
+              <div className="space-y-3">
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Focus task input</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+Enter</kbd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Toggle focus mode</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+F</kbd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Toggle pomodoro</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+P</kbd>
+                </div>
+                <div className="flex justify-between items-center">
+                  <span className="text-gray-300">Show shortcuts</span>
+                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+/</kbd>
+                </div>
+              </div>
+              
+              <button
+                onClick={() => setShowKeyboardShortcuts(false)}
+                className="w-full mt-6 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg transition-colors"
+              >
+                Close
+              </button>
+            </div>
+          </div>
+        )}
       </div>
+
+      {/* Pomodoro Widget */}
+      <PomodoroWidget
+        isVisible={showPomodoroWidget}
+        onClose={() => setShowPomodoroWidget(false)}
+        currentTask={currentPomodoroTask}
+        settings={appData.pomodoroSettings}
+        onUpdateSettings={(settings) => {
+          const updatedData = { ...appData, pomodoroSettings: settings };
+          setAppData(updatedData);
+          saveData(updatedData);
+        }}
+        onTaskComplete={updateTaskPomodoroTime}
+      />
     </div>
   );
 };
