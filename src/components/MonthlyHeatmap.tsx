@@ -1,0 +1,109 @@
+
+import React from 'react';
+import { Task } from '@/types/productivity';
+import { getSessionColor } from '@/utils/colorUtils';
+
+interface MonthlyHeatmapProps {
+  tasks: Task[];
+}
+
+const MonthlyHeatmap = ({ tasks }: MonthlyHeatmapProps) => {
+  const generateLast30Days = () => {
+    const days = [];
+    const today = new Date();
+    
+    for (let i = 29; i >= 0; i--) {
+      const date = new Date(today);
+      date.setDate(today.getDate() - i);
+      days.push(date.toISOString().split('T')[0]);
+    }
+    
+    return days;
+  };
+
+  const getTasksForDay = (day: string) => {
+    return tasks.filter(task => task.day === day);
+  };
+
+  const getDayName = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.toLocaleDateString('en-US', { weekday: 'short' });
+  };
+
+  const getDateDisplay = (dateString: string) => {
+    const date = new Date(dateString);
+    return date.getDate().toString();
+  };
+
+  const last30Days = generateLast30Days();
+
+  return (
+    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
+      <h2 className="text-xl font-semibold mb-6 text-gray-200">30-Day Productivity Heatmap</h2>
+      
+      <div className="grid grid-cols-7 lg:grid-cols-10 gap-2">
+        {last30Days.map(day => {
+          const dayTasks = getTasksForDay(day);
+          const taskCount = dayTasks.length;
+          const backgroundColor = getSessionColor(taskCount);
+          const isToday = day === new Date().toISOString().split('T')[0];
+
+          return (
+            <div
+              key={day}
+              className={`aspect-square rounded-lg border transition-all duration-200 hover:scale-110 cursor-pointer group relative ${
+                isToday ? 'border-blue-400 border-2' : 'border-slate-600'
+              }`}
+              style={{ backgroundColor }}
+            >
+              <div className="p-1 h-full flex flex-col justify-between">
+                <div className="text-xs text-gray-400 text-center">
+                  {getDayName(day)}
+                </div>
+                <div className="text-xs font-bold text-center">
+                  {getDateDisplay(day)}
+                </div>
+              </div>
+
+              {/* Tooltip */}
+              {taskCount > 0 && (
+                <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
+                  <div className="bg-gray-900 text-white text-xs rounded-lg p-3 shadow-lg min-w-48 max-w-64">
+                    <div className="font-medium mb-2">
+                      {new Date(day).toLocaleDateString('en-US', { 
+                        month: 'long', 
+                        day: 'numeric' 
+                      })} ({taskCount} {taskCount === 1 ? 'task' : 'tasks'})
+                    </div>
+                    <div className="space-y-1 max-h-32 overflow-y-auto">
+                      {dayTasks.map((task, index) => (
+                        <div key={index} className="text-gray-300">
+                          • {task.text}
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+              )}
+            </div>
+          );
+        })}
+      </div>
+
+      {/* Legend */}
+      <div className="flex items-center justify-center gap-2 mt-6">
+        <span className="text-xs text-gray-400">Less</span>
+        {[0, 1, 3, 5, 8].map(count => (
+          <div
+            key={count}
+            className="w-3 h-3 rounded-sm border border-slate-600"
+            style={{ backgroundColor: getSessionColor(count) }}
+          />
+        ))}
+        <span className="text-xs text-gray-400">More</span>
+      </div>
+    </div>
+  );
+};
+
+export default MonthlyHeatmap;
