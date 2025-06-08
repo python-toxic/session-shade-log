@@ -50,7 +50,8 @@ const Index = () => {
         switch (e.key) {
           case 'Enter':
             e.preventDefault();
-            document.querySelector('input[placeholder*="What needs"]')?.focus();
+            const taskInput = document.querySelector('input[placeholder*="What needs"]') as HTMLInputElement;
+            taskInput?.focus();
             break;
           case 'f':
             e.preventDefault();
@@ -245,7 +246,7 @@ const Index = () => {
             </div>
             {!focusMode && (
               <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
-                <MonthlyHeatmap tasks={appData.tasks} />
+                <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
               </div>
             )}
           </div>

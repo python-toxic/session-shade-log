@@ -1,13 +1,14 @@
 
 import React from 'react';
-import { Task } from '@/types/productivity';
+import { Task, ColorTheme } from '@/types/productivity';
 import { getSessionColor } from '@/utils/colorUtils';
 
 interface MonthlyHeatmapProps {
   tasks: Task[];
+  colorTheme: ColorTheme;
 }
 
-const MonthlyHeatmap = ({ tasks }: MonthlyHeatmapProps) => {
+const MonthlyHeatmap = ({ tasks, colorTheme }: MonthlyHeatmapProps) => {
   const generateLast30Days = () => {
     const days = [];
     const today = new Date();
@@ -45,7 +46,7 @@ const MonthlyHeatmap = ({ tasks }: MonthlyHeatmapProps) => {
         {last30Days.map(day => {
           const dayTasks = getTasksForDay(day);
           const taskCount = dayTasks.length;
-          const backgroundColor = getSessionColor(taskCount);
+          const backgroundColor = getSessionColor(taskCount, colorTheme);
           const isToday = day === new Date().toISOString().split('T')[0];
 
           return (
@@ -97,7 +98,7 @@ const MonthlyHeatmap = ({ tasks }: MonthlyHeatmapProps) => {
           <div
             key={count}
             className="w-3 h-3 rounded-sm border border-slate-600"
-            style={{ backgroundColor: getSessionColor(count) }}
+            style={{ backgroundColor: getSessionColor(count, colorTheme) }}
           />
         ))}
         <span className="text-xs text-gray-400">More</span>
