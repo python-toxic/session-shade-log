@@ -1,4 +1,3 @@
-
 export interface Task {
   id: string;
   text: string;
@@ -7,6 +6,7 @@ export interface Task {
   day: string; // YYYY-MM-DD format
   pomodoroTime?: number; // minutes spent in pomodoro
   completed?: boolean;
+  pomodoroCompleted?: boolean; // Track if pomodoro was completed for this task
 }
 
 export interface AppData {

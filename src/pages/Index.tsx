@@ -117,7 +117,11 @@ const Index = () => {
   const updateTaskPomodoroTime = (taskId: string, pomodoroTime: number) => {
     const updatedTasks = appData.tasks.map(task => 
       task.id === taskId 
-        ? { ...task, pomodoroTime: (task.pomodoroTime || 0) + pomodoroTime }
+        ? { 
+            ...task, 
+            pomodoroTime: (task.pomodoroTime || 0) + pomodoroTime,
+            pomodoroCompleted: true // Mark as completed when Pomodoro finishes
+          }
         : task
     );
     
@@ -183,7 +187,7 @@ const Index = () => {
 
   return (
     <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white p-4">
-      <div className="max-w-6xl mx-auto">
+      <div className="max-w-7xl mx-auto">
         {/* Header */}
         <div className={`flex items-center justify-between mb-8 focus-mode-transition ${
           focusMode ? 'animate-slide-in-center' : 'animate-fade-in'
@@ -197,7 +201,7 @@ const Index = () => {
             />
             <button
               onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
               title="Keyboard Shortcuts (Ctrl+/)"
             >
               <Keyboard size={16} />
@@ -205,14 +209,14 @@ const Index = () => {
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
             >
               <Settings size={16} />
               <span className="text-sm hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={() => setFocusMode(!focusMode)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800 hover:bg-slate-700 rounded-lg transition-colors hover-scale"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
             >
               {focusMode ? <Eye size={16} /> : <EyeOff size={16} />}
               <span className="text-sm">{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
@@ -226,12 +230,12 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className={`grid grid-cols-1 lg:grid-cols-3 gap-8 focus-mode-transition ${
-          focusMode ? 'lg:grid-cols-2' : ''
+        <div className={`grid grid-cols-1 gap-8 focus-mode-transition ${
+          focusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-4'
         }`}>
           {/* Left Column - Task Input and Session Grid */}
           <div className={`space-y-6 focus-mode-transition ${
-            focusMode ? 'lg:col-span-2 animate-slide-in-center' : 'lg:col-span-2'
+            focusMode ? 'col-span-1 animate-slide-in-center' : 'lg:col-span-3'
           }`}>
             <div className="animate-pop-in">
               <TaskInput 
@@ -259,20 +263,22 @@ const Index = () => {
 
           {/* Right Column - Stats Panel */}
           {!focusMode && (
-            <div className="lg:col-span-1 animate-pop-in" style={{ animationDelay: '0.3s' }}>
-              <StatsPanel 
-                streak={appData.streak}
-                avgTasksPerDay={appData.avgTasksPerDay}
-                tasks={appData.tasks}
-              />
+            <div className="lg:col-span-1 space-y-6">
+              <div className="animate-pop-in" style={{ animationDelay: '0.3s' }}>
+                <StatsPanel 
+                  streak={appData.streak}
+                  avgTasksPerDay={appData.avgTasksPerDay}
+                  tasks={appData.tasks}
+                />
+              </div>
             </div>
           )}
         </div>
 
         {/* Settings Panel */}
         {showSettings && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
-            <div className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
+            <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
               <h3 className="text-lg font-semibold mb-4">Settings</h3>
               
               <div className="space-y-4">
@@ -283,10 +289,10 @@ const Index = () => {
                       <button
                         key={theme.name}
                         onClick={() => updateColorTheme(theme)}
-                        className={`p-3 rounded-lg border-2 transition-all ${
+                        className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
                           appData.colorTheme.name === theme.name 
-                            ? 'border-blue-500 bg-slate-700' 
-                            : 'border-slate-600 hover:border-slate-500'
+                            ? 'border-blue-500 bg-slate-700/50' 
+                            : 'border-slate-600/50 hover:border-slate-500/70'
                         }`}
                       >
                         <div 
@@ -304,14 +310,14 @@ const Index = () => {
                   <div className="flex gap-2">
                     <button
                       onClick={() => exportData('json')}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600 hover:bg-blue-700 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-blue-600/80 hover:bg-blue-700/90 rounded-lg transition-all hover:scale-105"
                     >
                       <Download size={16} />
                       JSON
                     </button>
                     <button
                       onClick={() => exportData('csv')}
-                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-green-600 hover:bg-green-700 rounded-lg transition-colors"
+                      className="flex-1 flex items-center justify-center gap-2 py-2 bg-green-600/80 hover:bg-green-700/90 rounded-lg transition-all hover:scale-105"
                     >
                       <Download size={16} />
                       CSV
@@ -322,7 +328,7 @@ const Index = () => {
               
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-full mt-6 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg transition-colors"
+                className="w-full mt-6 py-2 bg-slate-600/80 hover:bg-slate-700/90 rounded-lg transition-all hover:scale-105"
               >
                 Close
               </button>
@@ -332,32 +338,32 @@ const Index = () => {
 
         {/* Keyboard Shortcuts Modal */}
         {showKeyboardShortcuts && (
-          <div className="fixed inset-0 bg-black/50 flex items-center justify-center z-40 animate-fade-in">
-            <div className="bg-slate-800 border border-slate-600 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+          <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
+            <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
               <h3 className="text-lg font-semibold mb-4">Keyboard Shortcuts</h3>
               
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Focus task input</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+Enter</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+Enter</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Toggle focus mode</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+F</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+F</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Toggle pomodoro</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+P</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+P</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Show shortcuts</span>
-                  <kbd className="px-2 py-1 bg-slate-700 rounded text-sm">Ctrl+/</kbd>
+                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+/</kbd>
                 </div>
               </div>
               
               <button
                 onClick={() => setShowKeyboardShortcuts(false)}
-                className="w-full mt-6 py-2 bg-slate-600 hover:bg-slate-700 rounded-lg transition-colors"
+                className="w-full mt-6 py-2 bg-slate-600/80 hover:bg-slate-700/90 rounded-lg transition-all hover:scale-105"
               >
                 Close
               </button>

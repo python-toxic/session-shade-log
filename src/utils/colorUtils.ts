@@ -9,7 +9,7 @@ export const colorThemes: ColorTheme[] = [
   { name: 'Rose Pink', baseHue: 330 },
 ];
 
-export const getSessionColor = (taskCount: number, theme: ColorTheme): string => {
+export const getSessionColor = (taskCount: number, theme: ColorTheme, hasCompletedPomodoros: boolean = false): string => {
   const { baseHue } = theme;
   
   if (taskCount === 0) {
@@ -18,7 +18,12 @@ export const getSessionColor = (taskCount: number, theme: ColorTheme): string =>
   
   // Progressive color calculation
   const saturation = Math.min(60 + taskCount * 10, 90);
-  const lightness = Math.max(85 - taskCount * 8, 25);
+  let lightness = Math.max(85 - taskCount * 8, 25);
+  
+  // Make color darker if there are completed Pomodoros
+  if (hasCompletedPomodoros) {
+    lightness = Math.max(lightness - 20, 15);
+  }
   
   return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
 };
