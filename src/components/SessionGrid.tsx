@@ -3,6 +3,7 @@ import { Settings } from 'lucide-react';
 import { Task, ColorTheme, SessionConfig } from '@/types/productivity';
 import { getSessionColor, getTargetIndicatorColor } from '@/utils/colorUtils';
 import SessionTargetSettings from './SessionTargetSettings';
+
 interface SessionGridProps {
   tasks: Task[];
   colorTheme: ColorTheme;
@@ -14,6 +15,7 @@ interface SessionGridProps {
     [sessionName: string]: number;
   }) => void;
 }
+
 const SessionGrid = ({
   tasks,
   colorTheme,
@@ -22,9 +24,11 @@ const SessionGrid = ({
   onUpdateTargets = () => {}
 }: SessionGridProps) => {
   const [showTargetSettings, setShowTargetSettings] = useState(false);
+
   const getSessionTasks = (sessionName: string) => {
     return tasks.filter(task => task.session === sessionName);
   };
+
   const getSessionStats = (sessionName: string) => {
     const sessionTasks = getSessionTasks(sessionName);
     const completedPomodoros = sessionTasks.filter(task => task.pomodoroCompleted).length;
@@ -35,8 +39,9 @@ const SessionGrid = ({
       pending: pendingTasks
     };
   };
+
   return <>
-      <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/30 hover:border-slate-600/50 transition-all animate-pop-in hover-scale mx-[79px]">
+      <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/30 hover:border-slate-600/50 transition-all animate-pop-in hover-scale">
         <div className="flex items-center justify-between mb-6">
           <h2 className="text-xl font-semibold text-gray-200">Today's Sessions</h2>
           <button onClick={() => setShowTargetSettings(true)} className="p-2 text-gray-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors" title="Customize session targets">
@@ -107,4 +112,5 @@ const SessionGrid = ({
       <SessionTargetSettings isVisible={showTargetSettings} onClose={() => setShowTargetSettings(false)} sessionTargets={sessionTargets} customSessions={customSessions} onUpdateTargets={onUpdateTargets} />
     </>;
 };
+
 export default SessionGrid;

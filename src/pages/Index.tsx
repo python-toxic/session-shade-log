@@ -11,6 +11,7 @@ import { Task, AppData } from '@/types/productivity';
 import { loadData, saveData, getCurrentSession, calculateStats, generateTaskId, playNotificationSound } from '@/utils/dataManager';
 import { colorThemes } from '@/utils/colorUtils';
 import { Eye, EyeOff, Palette, Settings, Download, Keyboard } from 'lucide-react';
+
 const Index = () => {
   const [appData, setAppData] = useState<AppData>({
     tasks: [],
@@ -208,16 +209,11 @@ const Index = () => {
         </div>
 
         {/* Main Content */}
-        <div className={`grid grid-cols-1 gap-8 focus-mode-transition ${focusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-4'}`}>
-          {/* Left Column - Task Input and Session Grid */}
-          <div className={`space-y-6 focus-mode-transition ${focusMode ? 'col-span-1 animate-slide-in-center' : 'lg:col-span-3'}`}>
+        <div className={`grid grid-cols-1 gap-8 focus-mode-transition ${focusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-12'}`}>
+          {/* Left Column - Task Input */}
+          <div className={`space-y-6 focus-mode-transition ${focusMode ? 'col-span-1 animate-slide-in-center' : 'lg:col-span-5'}`}>
             <div className="animate-pop-in">
               <TaskInput onAddTask={addTask} tasks={getTodaysTasks()} onDeleteTask={deleteTask} onStartPomodoro={startPomodoroForTask} />
-            </div>
-            <div style={{
-            animationDelay: '0.1s'
-          }} className="animate-pop-in mx-[2px] my-[22px] py-[9px] px-0 rounded-none">
-              <SessionGrid tasks={getTodaysTasks()} colorTheme={appData.colorTheme} sessionTargets={appData.sessionTargets} customSessions={appData.customSessions} onUpdateTargets={updateSessionTargets} />
             </div>
             {!focusMode && <div className="animate-pop-in" style={{
             animationDelay: '0.2s'
@@ -226,8 +222,17 @@ const Index = () => {
               </div>}
           </div>
 
+          {/* Middle Column - Session Grid */}
+          {!focusMode && <div className="lg:col-span-4 space-y-6">
+              <div style={{
+            animationDelay: '0.1s'
+          }} className="animate-pop-in">
+                <SessionGrid tasks={getTodaysTasks()} colorTheme={appData.colorTheme} sessionTargets={appData.sessionTargets} customSessions={appData.customSessions} onUpdateTargets={updateSessionTargets} />
+              </div>
+            </div>}
+
           {/* Right Column - Stats Panel */}
-          {!focusMode && <div className="lg:col-span-1 space-y-6">
+          {!focusMode && <div className="lg:col-span-3 space-y-6">
               <div className="animate-pop-in" style={{
             animationDelay: '0.3s'
           }}>
@@ -317,4 +322,5 @@ const Index = () => {
     }} onTaskComplete={updateTaskPomodoroTime} />
     </div>;
 };
+
 export default Index;
