@@ -3,7 +3,6 @@ import TimeDisplay from '@/components/TimeDisplay';
 import TaskInput from '@/components/TaskInput';
 import SessionGrid from '@/components/SessionGrid';
 import MonthlyHeatmap from '@/components/MonthlyHeatmap';
-import StatsPanel from '@/components/StatsPanel';
 import MainGoal from '@/components/MainGoal';
 import PomodoroWidget from '@/components/PomodoroWidget';
 import TaskTemplates from '@/components/TaskTemplates';
@@ -13,6 +12,7 @@ import { colorThemes } from '@/utils/colorUtils';
 import { Eye, EyeOff, Palette, Settings, Download, Keyboard } from 'lucide-react';
 
 const Index = () => {
+  // ... keep existing code (state declarations and useEffect hooks)
   const [appData, setAppData] = useState<AppData>({
     tasks: [],
     streak: 0,
@@ -42,7 +42,8 @@ const Index = () => {
     setAppData(data);
   }, []);
 
-  // Keyboard shortcuts
+  // ... keep existing code (keyboard shortcuts useEffect and all function definitions)
+
   useEffect(() => {
     const handleKeyDown = (e: KeyboardEvent) => {
       if (e.ctrlKey || e.metaKey) {
@@ -120,7 +121,7 @@ const Index = () => {
         ? { 
             ...task, 
             pomodoroTime: (task.pomodoroTime || 0) + pomodoroTime,
-            pomodoroCompleted: true // Mark as completed when Pomodoro finishes
+            pomodoroCompleted: true
           }
         : task
     );
@@ -186,14 +187,14 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white font-['Inter']">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
-        {/* Header with improved typography */}
-        <div className={`flex items-center justify-between mb-12 focus-mode-transition ${
+        {/* Header */}
+        <div className={`flex items-center justify-between mb-8 focus-mode-transition ${
           focusMode ? 'animate-slide-in-center' : 'animate-fade-in'
         }`}>
           <TimeDisplay />
-          <div className="flex items-center gap-4">
+          <div className="flex items-center gap-3">
             <TaskTemplates 
               templates={appData.taskTemplates}
               onAddTask={addTask}
@@ -201,72 +202,54 @@ const Index = () => {
             />
             <button
               onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-blue-500/30"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800/40 hover:bg-slate-700/50 hover:shadow-lg backdrop-blur-md rounded-lg transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-blue-500/30"
               title="Keyboard Shortcuts (Ctrl+/)"
             >
-              <Keyboard size={16} />
+              <Keyboard size={14} />
               <span className="text-sm hidden sm:inline">Shortcuts</span>
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-violet-500/30"
+              className="flex items-center gap-2 px-3 py-2 bg-slate-800/40 hover:bg-slate-700/50 hover:shadow-lg backdrop-blur-md rounded-lg transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-violet-500/30"
             >
-              <Settings size={16} />
+              <Settings size={14} />
               <span className="text-sm hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={() => setFocusMode(!focusMode)}
-              className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-blue-500/30 hover:border-blue-400/50"
+              className="flex items-center gap-2 px-3 py-2 bg-blue-600/20 hover:bg-blue-600/30 hover:shadow-lg backdrop-blur-md rounded-lg transition-all duration-300 hover:scale-105 border border-blue-500/30 hover:border-blue-400/50"
             >
-              {focusMode ? <Eye size={16} /> : <EyeOff size={16} />}
+              {focusMode ? <Eye size={14} /> : <EyeOff size={14} />}
               <span className="text-sm font-medium">{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
             </button>
           </div>
         </div>
 
-        {/* Main Goal with enhanced prominence */}
-        <div className={`focus-mode-transition mb-8 ${focusMode ? 'animate-slide-in-center' : ''}`}>
+        {/* Main Goal */}
+        <div className={`focus-mode-transition ${focusMode ? 'animate-slide-in-center' : ''}`}>
           <MainGoal goal={appData.mainGoal} onUpdate={updateMainGoal} />
         </div>
 
-        {/* Grid Layout with 12-column system */}
-        <div className={`grid gap-8 focus-mode-transition ${
+        {/* Main Content Grid */}
+        <div className={`grid gap-6 focus-mode-transition ${
           focusMode ? 'grid-cols-1' : 'grid-cols-12'
         }`}>
-          {/* Left Column - Tasks (8 columns in normal mode) */}
-          <div className={`space-y-8 focus-mode-transition ${
-            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-8'
+          {/* Today's Tasks */}
+          <div className={`space-y-6 focus-mode-transition ${
+            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-6'
           }`}>
-            {/* Today's Tasks with enhanced header */}
             <div className="animate-pop-in">
-              <div className="mb-6">
-                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent mb-2">
+              <div className="mb-4">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
                   Today's Tasks
-                </h1>
-                <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full"></div>
+                </h2>
+                <div className="w-16 h-1 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></div>
               </div>
               <TaskInput 
                 onAddTask={addTask} 
                 tasks={getTodaysTasks()} 
                 onDeleteTask={deleteTask}
                 onStartPomodoro={startPomodoroForTask}
-              />
-            </div>
-
-            {/* Sessions with enhanced header */}
-            <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
-              <div className="mb-6">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-2">
-                  Today's Sessions
-                </h2>
-                <div className="w-20 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
-              </div>
-              <SessionGrid 
-                tasks={getTodaysTasks()} 
-                colorTheme={appData.colorTheme}
-                sessionTargets={appData.sessionTargets}
-                customSessions={appData.customSessions}
-                onUpdateTargets={updateSessionTargets}
               />
             </div>
 
@@ -277,21 +260,29 @@ const Index = () => {
             )}
           </div>
 
-          {/* Right Column - Stats Panel (4 columns in normal mode) */}
+          {/* Today's Sessions */}
           {!focusMode && (
-            <div className="col-span-4 space-y-6">
-              <div className="animate-pop-in" style={{ animationDelay: '0.3s' }}>
-                <StatsPanel 
-                  streak={appData.streak}
-                  avgTasksPerDay={appData.avgTasksPerDay}
-                  tasks={appData.tasks}
+            <div className="col-span-6 space-y-6">
+              <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
+                <div className="mb-4">
+                  <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-2">
+                    Today's Sessions
+                  </h2>
+                  <div className="w-16 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+                </div>
+                <SessionGrid 
+                  tasks={getTodaysTasks()} 
+                  colorTheme={appData.colorTheme}
+                  sessionTargets={appData.sessionTargets}
+                  customSessions={appData.customSessions}
+                  onUpdateTargets={updateSessionTargets}
                 />
               </div>
             </div>
           )}
         </div>
 
-        {/* Settings and modals remain the same */}
+        {/* Settings and modals */}
         {showSettings && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
             <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
@@ -307,7 +298,7 @@ const Index = () => {
                         onClick={() => updateColorTheme(theme)}
                         className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
                           appData.colorTheme.name === theme.name 
-                            ? 'border-blue-500 bg-slate-700/50' 
+                            ? 'border-purple-500 bg-slate-700/50' 
                             : 'border-slate-600/50 hover:border-slate-500/70'
                         }`}
                       >

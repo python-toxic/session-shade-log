@@ -30,27 +30,22 @@ const MainGoal = ({ goal, onUpdate }: MainGoalProps) => {
   };
 
   return (
-    <div className="bg-slate-800/50 rounded-xl p-4 border border-slate-700/50 mb-6 animate-fade-in">
-      <div className="flex items-center gap-2">
-        <div className="w-2 h-2 bg-blue-500 rounded-full animate-pulse" />
-        <span className="text-xs font-medium text-gray-400 uppercase tracking-wide">Today's Main Goal</span>
-      </div>
-      
+    <div className="mb-8 animate-fade-in">
       {!isEditing ? (
-        <div 
+        <h1 
           onClick={() => setIsEditing(true)}
-          className="mt-2 text-lg font-medium text-white cursor-pointer hover:text-blue-300 transition-colors p-2 -mx-2 rounded-lg hover:bg-slate-700/30"
+          className="text-3xl font-bold text-white cursor-pointer hover:text-purple-300 transition-colors duration-300 text-center"
         >
           {goal}
-        </div>
+        </h1>
       ) : (
-        <div className="mt-2 flex items-center gap-2">
+        <div className="flex items-center justify-center gap-3">
           <input
             type="text"
             value={editValue}
             onChange={(e) => setEditValue(e.target.value)}
             onKeyDown={handleKeyPress}
-            className="flex-1 bg-slate-700/50 border border-slate-600 rounded-lg px-3 py-2 text-white focus:outline-none focus:ring-2 focus:ring-blue-500 focus:border-transparent"
+            className="text-3xl font-bold bg-transparent border-b-2 border-purple-400 text-white text-center focus:outline-none focus:border-purple-300 transition-colors"
             autoFocus
             maxLength={100}
           />
