@@ -24,37 +24,37 @@ const TaskInput = ({ onAddTask, tasks, onDeleteTask, onStartPomodoro }: TaskInpu
   const completedPomodoros = tasks.filter(task => task.pomodoroCompleted).length;
 
   return (
-    <div className="backdrop-blur-md rounded-xl p-4 border border-slate-700/20 hover:border-slate-600/30 hover:shadow-lg transition-all duration-300 bg-slate-800/10">
-      {/* Task Input Form */}
+    <div className="glass-morphism rounded-xl p-4 border border-white/10 hover:border-white/20 transition-all duration-300">
+      {/* Fixed Task Input Form */}
       <form onSubmit={handleSubmit} className="flex gap-3 mb-4">
         <input
           type="text"
           value={taskText}
           onChange={(e) => setTaskText(e.target.value)}
           placeholder="What needs to be done today?"
-          className="flex-1 px-4 py-3 bg-slate-700/30 border border-slate-600/40 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400/60 focus:bg-slate-700/40 transition-all duration-300"
+          className="flex-1 px-4 py-3 bg-white/5 border border-white/10 rounded-lg text-white placeholder-gray-400 focus:outline-none focus:border-purple-400/60 focus:bg-white/10 transition-all duration-300"
         />
         <button
           type="submit"
-          className="px-6 py-3 bg-gradient-to-r from-purple-600/80 to-violet-600/80 hover:from-purple-600/90 hover:to-violet-600/90 hover:shadow-purple-500/25 hover:shadow-lg rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105 flex items-center gap-2"
+          className="px-6 py-3 bg-gradient-to-r from-purple-600 to-violet-600 hover:from-purple-500 hover:to-violet-500 rounded-lg text-white font-semibold transition-all duration-300 hover:scale-105 hover:shadow-lg hover:shadow-purple-500/25 flex items-center gap-2"
         >
           <Plus size={18} />
           <span className="hidden sm:inline">Add Task</span>
         </button>
       </form>
 
-      {/* Task List or Empty State */}
+      {/* Scrollable Task List - Show only 3 tasks at a time */}
       {tasks.length > 0 ? (
-        <div className="space-y-2">
+        <div className="h-[180px] overflow-y-auto space-y-2 pr-2 scrollbar-thin scrollbar-track-white/5 scrollbar-thumb-white/20 hover:scrollbar-thumb-white/30">
           {tasks.map((task, index) => (
             <div
               key={task.id}
-              className="group flex items-center justify-between px-4 py-3 bg-slate-700/20 rounded-lg border border-slate-600/20 hover:border-slate-500/40 hover:bg-slate-700/30 hover:shadow-md transition-all duration-300"
+              className="group flex items-center justify-between px-3 py-2 bg-white/5 rounded-lg border border-white/5 hover:border-white/10 hover:bg-white/10 transition-all duration-300 h-12"
             >
               <div className="flex-1 min-w-0 flex items-center justify-between">
-                <p className="text-white font-medium truncate mr-4">{task.text}</p>
+                <p className="text-white font-medium truncate mr-4 text-sm">{task.text}</p>
                 <div className="flex items-center gap-2 flex-shrink-0">
-                  <span className="text-xs text-gray-400 bg-slate-600/30 px-2 py-1 rounded">
+                  <span className="text-xs text-gray-400 bg-white/10 px-2 py-1 rounded">
                     {new Date(task.timestamp).toLocaleTimeString([], { 
                       hour: '2-digit', 
                       minute: '2-digit' 
@@ -82,29 +82,34 @@ const TaskInput = ({ onAddTask, tasks, onDeleteTask, onStartPomodoro }: TaskInpu
                   className="p-2 text-green-400 hover:bg-green-400/10 rounded-lg transition-all duration-200 hover:scale-110"
                   title="Start Pomodoro"
                 >
-                  <Play size={16} />
+                  <Play size={14} />
                 </button>
                 <button
                   onClick={() => onDeleteTask(index)}
                   className="p-2 text-red-400 hover:bg-red-400/10 rounded-lg transition-all duration-200 hover:scale-110"
                   title="Delete task"
                 >
-                  <Minus size={16} />
+                  <Minus size={14} />
                 </button>
               </div>
             </div>
           ))}
         </div>
       ) : (
-        <div className="text-center py-6">
-          <p className="text-gray-400 text-sm mb-2">
-            Add your first task and build your momentum
-          </p>
+        <div className="text-center py-8 h-[180px] flex items-center justify-center">
+          <div>
+            <p className="text-gray-400 text-sm mb-2">
+              You're 1 step away from winning the day! ✍️
+            </p>
+            <p className="text-gray-500 text-xs">
+              Add your first task and build your momentum
+            </p>
+          </div>
         </div>
       )}
 
       {/* Pomodoro Count */}
-      <div className="mt-4 pt-3 border-t border-slate-700/30">
+      <div className="mt-4 pt-3 border-t border-white/10">
         <p className="text-sm text-gray-400">
           Pomodoros completed today: <span className="text-white font-medium">{completedPomodoros}</span>
         </p>

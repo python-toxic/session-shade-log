@@ -39,10 +39,11 @@ const MonthlyHeatmap = ({ tasks, colorTheme }: MonthlyHeatmapProps) => {
   const last30Days = generateLast30Days();
 
   return (
-    <div className="bg-slate-800/50 rounded-xl p-6 border border-slate-700/50">
-      <h2 className="text-xl font-semibold mb-6 text-gray-200">30-Day Productivity Heatmap</h2>
+    <div className="glass-morphism rounded-xl p-4 border border-white/10 h-fit">
+      <h2 className="text-lg font-semibold mb-4 text-gray-200">30-Day Productivity Heatmap</h2>
       
-      <div className="grid grid-cols-7 lg:grid-cols-10 gap-2">
+      {/* Extended width grid that takes remaining space */}
+      <div className="grid grid-cols-6 sm:grid-cols-10 lg:grid-cols-15 xl:grid-cols-15 gap-1.5 w-full">
         {last30Days.map(day => {
           const dayTasks = getTasksForDay(day);
           const taskCount = dayTasks.length;
@@ -52,16 +53,16 @@ const MonthlyHeatmap = ({ tasks, colorTheme }: MonthlyHeatmapProps) => {
           return (
             <div
               key={day}
-              className={`aspect-square rounded-lg border transition-all duration-200 hover:scale-110 cursor-pointer group relative ${
-                isToday ? 'border-blue-400 border-2' : 'border-slate-600'
+              className={`aspect-square rounded-md border transition-all duration-200 hover:scale-110 cursor-pointer group relative ${
+                isToday ? 'border-blue-400 border-2' : 'border-white/20'
               }`}
               style={{ backgroundColor }}
             >
-              <div className="p-1 h-full flex flex-col justify-between">
-                <div className="text-xs text-gray-400 text-center">
-                  {getDayName(day)}
+              <div className="p-1 h-full flex flex-col justify-between text-center">
+                <div className="text-[10px] text-gray-400">
+                  {getDayName(day).charAt(0)}
                 </div>
-                <div className="text-xs font-bold text-center">
+                <div className="text-[10px] font-bold text-white">
                   {getDateDisplay(day)}
                 </div>
               </div>
@@ -92,12 +93,12 @@ const MonthlyHeatmap = ({ tasks, colorTheme }: MonthlyHeatmapProps) => {
       </div>
 
       {/* Legend */}
-      <div className="flex items-center justify-center gap-2 mt-6">
+      <div className="flex items-center justify-center gap-2 mt-4">
         <span className="text-xs text-gray-400">Less</span>
         {[0, 1, 3, 5, 8].map(count => (
           <div
             key={count}
-            className="w-3 h-3 rounded-sm border border-slate-600"
+            className="w-3 h-3 rounded-sm border border-white/20"
             style={{ backgroundColor: getSessionColor(count, colorTheme) }}
           />
         ))}

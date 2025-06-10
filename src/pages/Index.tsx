@@ -1,3 +1,4 @@
+
 import React, { useState, useEffect } from 'react';
 import TimeDisplay from '@/components/TimeDisplay';
 import TaskInput from '@/components/TaskInput';
@@ -187,10 +188,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white font-['Inter']">
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-slate-900 to-slate-950 text-white font-['Inter']">
       <div className="container mx-auto px-6 py-8 max-w-7xl">
         {/* Header */}
-        <div className={`flex items-center justify-between mb-8 focus-mode-transition ${
+        <div className={`flex items-center justify-between mb-6 focus-mode-transition ${
           focusMode ? 'animate-slide-in-center' : 'animate-fade-in'
         }`}>
           <TimeDisplay />
@@ -202,7 +203,7 @@ const Index = () => {
             />
             <button
               onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800/40 hover:bg-slate-700/50 hover:shadow-lg backdrop-blur-md rounded-lg transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-blue-500/30"
+              className="flex items-center gap-2 px-3 py-2 glass-morphism hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-105 border border-white/10 hover:border-blue-500/30"
               title="Keyboard Shortcuts (Ctrl+/)"
             >
               <Keyboard size={14} />
@@ -210,7 +211,7 @@ const Index = () => {
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center gap-2 px-3 py-2 bg-slate-800/40 hover:bg-slate-700/50 hover:shadow-lg backdrop-blur-md rounded-lg transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-violet-500/30"
+              className="flex items-center gap-2 px-3 py-2 glass-morphism hover:bg-white/10 rounded-lg transition-all duration-300 hover:scale-105 border border-white/10 hover:border-violet-500/30"
             >
               <Settings size={14} />
               <span className="text-sm hidden sm:inline">Settings</span>
@@ -225,25 +226,25 @@ const Index = () => {
           </div>
         </div>
 
-        {/* Main Goal */}
-        <div className={`focus-mode-transition ${focusMode ? 'animate-slide-in-center' : ''}`}>
+        {/* Main Goal - Simple text */}
+        <div className={`text-center mb-8 focus-mode-transition ${focusMode ? 'animate-slide-in-center' : ''}`}>
           <MainGoal goal={appData.mainGoal} onUpdate={updateMainGoal} />
         </div>
 
-        {/* Main Content Grid */}
+        {/* Main Content Grid - Improved layout with proper spacing */}
         <div className={`grid gap-6 focus-mode-transition ${
           focusMode ? 'grid-cols-1' : 'grid-cols-12'
         }`}>
-          {/* Today's Tasks */}
+          {/* Today's Tasks - Optimized column span */}
           <div className={`space-y-6 focus-mode-transition ${
-            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-6'
+            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-4'
           }`}>
             <div className="animate-pop-in">
               <div className="mb-4">
-                <h2 className="text-2xl font-bold bg-gradient-to-r from-purple-400 to-violet-400 bg-clip-text text-transparent mb-2">
+                <h2 className="text-xl font-bold text-gradient mb-2">
                   Today's Tasks
                 </h2>
-                <div className="w-16 h-1 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></div>
+                <div className="w-12 h-1 bg-gradient-to-r from-purple-500 to-violet-500 rounded-full"></div>
               </div>
               <TaskInput 
                 onAddTask={addTask} 
@@ -252,31 +253,35 @@ const Index = () => {
                 onStartPomodoro={startPomodoroForTask}
               />
             </div>
-
-            {!focusMode && (
-              <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
-                <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
-              </div>
-            )}
           </div>
 
-          {/* Today's Sessions */}
+          {/* Sessions and Heatmap - Better space distribution */}
           {!focusMode && (
-            <div className="col-span-6 space-y-6">
-              <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
-                <div className="mb-4">
-                  <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-2">
-                    Today's Sessions
-                  </h2>
-                  <div className="w-16 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+            <div className="col-span-8 grid grid-cols-12 gap-6">
+              {/* Today's Sessions */}
+              <div className="col-span-7">
+                <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
+                  <div className="mb-4">
+                    <h2 className="text-xl font-bold text-gradient mb-2">
+                      Today's Sessions
+                    </h2>
+                    <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+                  </div>
+                  <SessionGrid 
+                    tasks={getTodaysTasks()} 
+                    colorTheme={appData.colorTheme}
+                    sessionTargets={appData.sessionTargets}
+                    customSessions={appData.customSessions}
+                    onUpdateTargets={updateSessionTargets}
+                  />
                 </div>
-                <SessionGrid 
-                  tasks={getTodaysTasks()} 
-                  colorTheme={appData.colorTheme}
-                  sessionTargets={appData.sessionTargets}
-                  customSessions={appData.customSessions}
-                  onUpdateTargets={updateSessionTargets}
-                />
+              </div>
+
+              {/* Extended Heatmap */}
+              <div className="col-span-5">
+                <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
+                  <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
+                </div>
               </div>
             </div>
           )}
@@ -285,7 +290,7 @@ const Index = () => {
         {/* Settings and modals */}
         {showSettings && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
-            <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+            <div className="glass-morphism border border-white/20 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
               <h3 className="text-lg font-semibold mb-4">Settings</h3>
               
               <div className="space-y-4">
@@ -298,8 +303,8 @@ const Index = () => {
                         onClick={() => updateColorTheme(theme)}
                         className={`p-3 rounded-lg border-2 transition-all hover:scale-105 ${
                           appData.colorTheme.name === theme.name 
-                            ? 'border-purple-500 bg-slate-700/50' 
-                            : 'border-slate-600/50 hover:border-slate-500/70'
+                            ? 'border-purple-500 bg-white/10' 
+                            : 'border-white/20 hover:border-white/40'
                         }`}
                       >
                         <div 
@@ -335,7 +340,7 @@ const Index = () => {
               
               <button
                 onClick={() => setShowSettings(false)}
-                className="w-full mt-6 py-2 bg-slate-600/80 hover:bg-slate-700/90 rounded-lg transition-all hover:scale-105"
+                className="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all hover:scale-105"
               >
                 Close
               </button>
@@ -345,31 +350,31 @@ const Index = () => {
 
         {showKeyboardShortcuts && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
-            <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
+            <div className="glass-morphism border border-white/20 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
               <h3 className="text-lg font-semibold mb-4">Keyboard Shortcuts</h3>
               
               <div className="space-y-3">
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Focus task input</span>
-                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+Enter</kbd>
+                  <kbd className="px-2 py-1 bg-white/10 rounded text-sm">Ctrl+Enter</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Toggle focus mode</span>
-                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+F</kbd>
+                  <kbd className="px-2 py-1 bg-white/10 rounded text-sm">Ctrl+F</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Toggle pomodoro</span>
-                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+P</kbd>
+                  <kbd className="px-2 py-1 bg-white/10 rounded text-sm">Ctrl+P</kbd>
                 </div>
                 <div className="flex justify-between items-center">
                   <span className="text-gray-300">Show shortcuts</span>
-                  <kbd className="px-2 py-1 bg-slate-700/50 rounded text-sm">Ctrl+/</kbd>
+                  <kbd className="px-2 py-1 bg-white/10 rounded text-sm">Ctrl+/</kbd>
                 </div>
               </div>
               
               <button
                 onClick={() => setShowKeyboardShortcuts(false)}
-                className="w-full mt-6 py-2 bg-slate-600/80 hover:bg-slate-700/90 rounded-lg transition-all hover:scale-105"
+                className="w-full mt-6 py-2 bg-white/10 hover:bg-white/20 rounded-lg transition-all hover:scale-105"
               >
                 Close
               </button>
