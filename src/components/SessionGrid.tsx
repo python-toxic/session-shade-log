@@ -83,7 +83,7 @@ const SessionGrid = ({
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className={`glass-morphism rounded-xl border-2 p-3 flex flex-col justify-between transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer h-32 w-full ${
+                  className={`glass-morphism rounded-xl border-2 p-3 flex flex-col justify-center transition-all duration-300 hover:scale-105 hover:shadow-lg cursor-pointer h-32 w-full ${
                     stats.total > 0 ? 'hover:shadow-purple-500/20' : ''
                   }`}
                   style={{ 
@@ -93,13 +93,13 @@ const SessionGrid = ({
                   onClick={() => stats.total > 0 && toggleSessionExpansion(session.id)}
                   title={`${stats.completed}/${target} Pomodoros completed`}
                 >
-                  {/* Header - centered and compact */}
-                  <div className="text-center mb-2">
+                  {/* Header - perfectly centered */}
+                  <div className="text-center mb-3">
                     <div className="flex items-center justify-center gap-2 mb-1">
                       <span className="text-lg">{getSessionIcon(session.id)}</span>
-                      <h3 className="font-bold text-sm text-white">{session.name}</h3>
+                      <h3 className="font-semibold text-sm text-white">{session.name}</h3>
                       {stats.total > 0 && (
-                        <button className="text-gray-300 hover:text-white transition-colors ml-auto">
+                        <button className="text-gray-300 hover:text-white transition-colors">
                           {isExpanded ? <ChevronUp size={12} /> : <ChevronDown size={12} />}
                         </button>
                       )}
@@ -122,9 +122,9 @@ const SessionGrid = ({
 
                     {/* Always visible progress bar */}
                     <div className="relative w-full">
-                      <div className="w-full bg-white/10 rounded-full h-1">
+                      <div className="w-full bg-white/10 rounded-full h-1.5">
                         <div 
-                          className="h-1 rounded-full transition-all duration-500"
+                          className="h-1.5 rounded-full transition-all duration-500"
                           style={{ 
                             width: `${Math.min((stats.completed / target) * 100, 100)}%`,
                             backgroundColor: targetIndicatorColor
@@ -140,12 +140,12 @@ const SessionGrid = ({
                     {stats.total > 0 && (
                       <div className="flex justify-center items-center gap-2 text-xs">
                         {stats.completed > 0 && (
-                          <span className="text-green-300 bg-green-400/20 px-2 py-1 rounded border border-green-400/30">
+                          <span className="text-green-300 bg-green-400/20 px-2 py-0.5 rounded border border-green-400/30">
                             ✓ {stats.completed}
                           </span>
                         )}
                         {stats.pending > 0 && (
-                          <span className="text-yellow-300 bg-yellow-400/20 px-2 py-1 rounded border border-yellow-400/30">
+                          <span className="text-yellow-300 bg-yellow-400/20 px-2 py-0.5 rounded border border-yellow-400/30">
                             ⏳ {stats.pending}
                           </span>
                         )}

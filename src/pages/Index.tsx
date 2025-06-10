@@ -1,4 +1,3 @@
-
 import React, { useState, useEffect } from 'react';
 import TimeDisplay from '@/components/TimeDisplay';
 import TaskInput from '@/components/TaskInput';
@@ -231,13 +230,13 @@ const Index = () => {
           <MainGoal goal={appData.mainGoal} onUpdate={updateMainGoal} />
         </div>
 
-        {/* Main Content Grid - Improved layout with proper spacing */}
+        {/* Main Content - Two columns side by side */}
         <div className={`grid gap-6 focus-mode-transition ${
-          focusMode ? 'grid-cols-1' : 'grid-cols-12'
+          focusMode ? 'grid-cols-1' : 'grid-cols-2'
         }`}>
-          {/* Today's Tasks - Optimized column span */}
+          {/* Today's Tasks */}
           <div className={`space-y-6 focus-mode-transition ${
-            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-4'
+            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-1'
           }`}>
             <div className="animate-pop-in">
               <div className="mb-4">
@@ -255,37 +254,36 @@ const Index = () => {
             </div>
           </div>
 
-          {/* Sessions and Heatmap - Better space distribution */}
+          {/* Today's Sessions */}
           {!focusMode && (
-            <div className="col-span-8 grid grid-cols-12 gap-6">
-              {/* Today's Sessions */}
-              <div className="col-span-7">
-                <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
-                  <div className="mb-4">
-                    <h2 className="text-xl font-bold text-gradient mb-2">
-                      Today's Sessions
-                    </h2>
-                    <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
-                  </div>
-                  <SessionGrid 
-                    tasks={getTodaysTasks()} 
-                    colorTheme={appData.colorTheme}
-                    sessionTargets={appData.sessionTargets}
-                    customSessions={appData.customSessions}
-                    onUpdateTargets={updateSessionTargets}
-                  />
+            <div className="col-span-1">
+              <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
+                <div className="mb-4">
+                  <h2 className="text-xl font-bold text-gradient mb-2">
+                    Today's Sessions
+                  </h2>
+                  <div className="w-12 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
                 </div>
-              </div>
-
-              {/* Extended Heatmap */}
-              <div className="col-span-5">
-                <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
-                  <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
-                </div>
+                <SessionGrid 
+                  tasks={getTodaysTasks()} 
+                  colorTheme={appData.colorTheme}
+                  sessionTargets={appData.sessionTargets}
+                  customSessions={appData.customSessions}
+                  onUpdateTargets={updateSessionTargets}
+                />
               </div>
             </div>
           )}
         </div>
+
+        {/* Heatmap - Full width below main content */}
+        {!focusMode && (
+          <div className="mt-6">
+            <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
+              <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
+            </div>
+          </div>
+        )}
 
         {/* Settings and modals */}
         {showSettings && (
