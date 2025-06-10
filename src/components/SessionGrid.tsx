@@ -1,8 +1,8 @@
 
 import React, { useState } from 'react';
-import { Settings } from 'lucide-react';
+import { Settings, ChevronDown, ChevronUp } from 'lucide-react';
 import { Task, ColorTheme, SessionConfig } from '@/types/productivity';
-import { getSessionColor, getTargetIndicatorColor } from '@/utils/colorUtils';
+import { getSessionColor, getTargetIndicatorColor, sessionColors } from '@/utils/colorUtils';
 import SessionTargetSettings from './SessionTargetSettings';
 
 interface SessionGridProps {
@@ -21,6 +21,7 @@ const SessionGrid = ({
   onUpdateTargets = () => {}
 }: SessionGridProps) => {
   const [showTargetSettings, setShowTargetSettings] = useState(false);
+  const [expandedSession, setExpandedSession] = useState<string | null>(null);
 
   const getSessionTasks = (sessionName: string) => {
     return tasks.filter(task => task.session === sessionName);
@@ -33,96 +34,143 @@ const SessionGrid = ({
     return { total: sessionTasks.length, completed: completedPomodoros, pending: pendingTasks };
   };
 
+  const getSessionIcon = (sessionName: string) => {
+    const icons = {
+      Morning: '🌅',
+      Midday: '☀️',
+      Afternoon: '🌤️',
+      Night: '🌙'
+    };
+    return icons[sessionName as keyof typeof icons] || '⏰';
+  };
+
+  const toggleSessionExpansion = (sessionId: string) => {
+    setExpandedSession(expandedSession === sessionId ? null : sessionId);
+  };
+
   return (
     <>
-      <div className="bg-slate-800/30 backdrop-blur-sm rounded-xl p-6 border border-slate-700/30 hover:border-slate-600/50 transition-all animate-pop-in hover-scale">
-        <div className="flex items-center justify-between mb-6">
-          <h2 className="text-xl font-semibold text-gray-200">Today's Sessions</h2>
+      <div className="backdrop-blur-md rounded-2xl p-6 border border-slate-700/20 hover:border-slate-600/30 transition-all duration-300 bg-slate-800/10">
+        <div className="flex items-center justify-between mb-8">
+          <div className="flex items-center gap-3">
+            <div className="w-3 h-3 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full animate-pulse"></div>
+            <span className="text-sm font-medium text-gray-400 uppercase tracking-wider">Interactive Sessions</span>
+          </div>
           <button
             onClick={() => setShowTargetSettings(true)}
-            className="p-2 text-gray-400 hover:text-white hover:bg-slate-700/50 rounded-lg transition-colors"
+            className="p-2 text-gray-400 hover:text-white hover:bg-slate-700/30 rounded-xl transition-all duration-200 border border-transparent hover:border-slate-600/30"
             title="Customize session targets"
           >
-            <Settings size={16} />
+            <Settings size={18} />
           </button>
         </div>
-        <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
+
+        <div className="grid grid-cols-2 lg:grid-cols-4 gap-6">
           {customSessions.map((session, index) => {
             const stats = getSessionStats(session.id);
             const target = sessionTargets[session.id] || 3;
-            const backgroundColor = getSessionColor(stats.total, colorTheme, stats.completed > 0);
+            const sessionColor = sessionColors[session.id as keyof typeof sessionColors];
+            const hasCompletedPomodoros = stats.completed > 0;
+            const backgroundColor = getSessionColor(stats.total, colorTheme, hasCompletedPomodoros, session.id);
             const targetIndicatorColor = getTargetIndicatorColor(stats.total, target, colorTheme);
+            const isExpanded = expandedSession === session.id;
 
             return (
               <div
                 key={session.id}
-                className="relative group cursor-pointer animate-scale-in"
+                className="relative group animate-scale-in"
                 style={{ animationDelay: `${index * 0.1}s` }}
               >
                 <div
-                  className="aspect-square rounded-lg border-2 border-slate-600/50 p-4 flex flex-col justify-between transition-all duration-300 hover:scale-105 hover:border-blue-500/70 backdrop-blur-sm"
-                  style={{ backgroundColor }}
+                  className={`backdrop-blur-sm rounded-2xl border-2 p-5 flex flex-col justify-between transition-all duration-300 hover:scale-105 border-slate-600/30 hover:border-opacity-70 cursor-pointer ${
+                    stats.total > 0 ? 'hover:shadow-lg hover:shadow-slate-900/50' : ''
+                  }`}
+                  style={{ 
+                    backgroundColor,
+                    borderColor: sessionColor ? `hsl(${sessionColor.hue}, 50%, 40%)` : undefined
+                  }}
+                  onClick={() => stats.total > 0 && toggleSessionExpansion(session.id)}
                 >
-                  <div>
-                    <h3 className="font-medium text-sm mb-1">{session.name}</h3>
-                    <p className="text-xs text-gray-400">{session.timeRange}</p>
+                  <div className="mb-4">
+                    <div className="flex items-center justify-between mb-2">
+                      <h3 className="font-bold text-lg text-white flex items-center gap-2">
+                        <span className="text-2xl">{getSessionIcon(session.id)}</span>
+                        {session.name}
+                      </h3>
+                      {stats.total > 0 && (
+                        <button className="text-gray-300 hover:text-white transition-colors">
+                          {isExpanded ? <ChevronUp size={18} /> : <ChevronDown size={18} />}
+                        </button>
+                      )}
+                    </div>
+                    <p className="text-sm text-gray-300 font-medium">{session.timeRange}</p>
                   </div>
-                  <div className="text-right">
-                    <span className="text-lg font-bold">{stats.total}</span>
-                    <div className="flex items-center justify-end gap-1 mt-1">
-                      <span className="text-xs text-gray-400">
-                        /{target}
-                      </span>
-                      <div 
-                        className="w-2 h-2 rounded-full"
-                        style={{ backgroundColor: targetIndicatorColor }}
-                        title={`Target: ${target} tasks`}
-                      />
+
+                  <div className="space-y-3">
+                    <div className="flex items-center justify-between">
+                      <span className="text-3xl font-bold text-white">{stats.total}</span>
+                      <div className="flex items-center gap-2">
+                        <span className="text-sm text-gray-300">/{target}</span>
+                        <div 
+                          className="w-3 h-3 rounded-full border-2 border-white/20"
+                          style={{ backgroundColor: targetIndicatorColor }}
+                          title={`Target: ${target} tasks`}
+                        />
+                      </div>
                     </div>
-                    <div className="flex justify-end gap-2 mt-1">
-                      {stats.completed > 0 && (
-                        <span className="text-xs text-green-400">✓{stats.completed}</span>
-                      )}
-                      {stats.pending > 0 && (
-                        <span className="text-xs text-yellow-400">⏳{stats.pending}</span>
-                      )}
-                    </div>
+
+                    {stats.total > 0 && (
+                      <div className="flex justify-between items-center">
+                        {stats.completed > 0 && (
+                          <span className="text-sm text-green-300 bg-green-400/20 px-3 py-1 rounded-full border border-green-400/30">
+                            ✓ {stats.completed}
+                          </span>
+                        )}
+                        {stats.pending > 0 && (
+                          <span className="text-sm text-yellow-300 bg-yellow-400/20 px-3 py-1 rounded-full border border-yellow-400/30">
+                            ⏳ {stats.pending}
+                          </span>
+                        )}
+                      </div>
+                    )}
+
+                    {/* Progress Ring */}
+                    {stats.total > 0 && (
+                      <div className="relative">
+                        <div className="w-full bg-white/10 rounded-full h-2">
+                          <div 
+                            className="h-2 rounded-full transition-all duration-500"
+                            style={{ 
+                              width: `${Math.min((stats.total / target) * 100, 100)}%`,
+                              backgroundColor: targetIndicatorColor
+                            }}
+                          />
+                        </div>
+                        {stats.total >= target && (
+                          <div className="absolute -top-1 -right-1 w-4 h-4 bg-green-500 rounded-full animate-pulse border-2 border-white" />
+                        )}
+                      </div>
+                    )}
                   </div>
                 </div>
 
-                {/* Target Progress Ring */}
-                {stats.total > 0 && (
-                  <div className="absolute -top-1 -right-1">
-                    <div className="relative w-6 h-6">
-                      <div 
-                        className="absolute inset-0 rounded-full border-2"
-                        style={{ 
-                          borderColor: targetIndicatorColor,
-                          transform: `rotate(${(stats.total / target) * 360 - 90}deg)`,
-                        }}
-                      />
-                      {stats.total >= target && (
-                        <div className="absolute inset-1 bg-green-500 rounded-full animate-pulse-ring" />
-                      )}
-                    </div>
-                  </div>
-                )}
-
-                {/* Tooltip */}
-                {stats.total > 0 && (
-                  <div className="absolute bottom-full left-1/2 transform -translate-x-1/2 mb-2 opacity-0 group-hover:opacity-100 transition-opacity pointer-events-none z-10">
-                    <div className="bg-gray-900/90 backdrop-blur-sm text-white text-xs rounded-lg p-3 shadow-lg min-w-48 max-w-64">
-                      <div className="font-medium mb-2">{session.name} Tasks ({stats.total}/{target}):</div>
-                      <div className="space-y-1">
-                        {getSessionTasks(session.id).map((task, index) => (
-                          <div key={index} className="text-gray-300 flex items-center gap-2">
-                            {task.pomodoroCompleted ? '✅' : '⏳'} {task.text}
+                {/* Expanded Task List */}
+                {isExpanded && stats.total > 0 && (
+                  <div className="absolute top-full left-0 right-0 mt-2 z-10 bg-slate-800/95 backdrop-blur-md border border-slate-600/40 rounded-xl p-4 shadow-xl">
+                    <div className="space-y-2 max-h-64 overflow-y-auto">
+                      {getSessionTasks(session.id).map((task, taskIndex) => (
+                        <div key={taskIndex} className="flex items-center gap-3 p-3 bg-slate-700/30 rounded-lg">
+                          <span className="text-lg">
+                            {task.pomodoroCompleted ? '✅' : '⏳'}
+                          </span>
+                          <div className="flex-1 min-w-0">
+                            <p className="text-white font-medium truncate">{task.text}</p>
                             {task.pomodoroTime && task.pomodoroTime > 0 && (
-                              <span className="text-blue-400 text-xs">🍅{task.pomodoroTime}m</span>
+                              <p className="text-blue-400 text-sm">🍅 {task.pomodoroTime}m</p>
                             )}
                           </div>
-                        ))}
-                      </div>
+                        </div>
+                      ))}
                     </div>
                   </div>
                 )}

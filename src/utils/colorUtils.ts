@@ -9,23 +9,29 @@ export const colorThemes: ColorTheme[] = [
   { name: 'Rose Pink', baseHue: 330 },
 ];
 
-export const getSessionColor = (taskCount: number, theme: ColorTheme, hasCompletedPomodoros: boolean = false): string => {
-  const { baseHue } = theme;
+// Unique colors for each session
+export const sessionColors = {
+  Morning: { hue: 200, name: 'Cool Blue' },    // Cool blue for morning
+  Midday: { hue: 45, name: 'Golden Yellow' },  // Golden yellow for midday
+  Afternoon: { hue: 25, name: 'Warm Orange' }, // Warm orange for afternoon
+  Night: { hue: 260, name: 'Deep Purple' }     // Deep purple for night
+};
+
+export const getSessionColor = (taskCount: number, theme: ColorTheme, hasCompletedPomodoros: boolean = false, sessionName?: string): string => {
+  // Use session-specific colors if available
+  const sessionColor = sessionName && sessionColors[sessionName as keyof typeof sessionColors];
+  const baseHue = sessionColor ? sessionColor.hue : theme.baseHue;
   
   if (taskCount === 0) {
-    return `hsl(${baseHue}, 10%, 15%)`; // Very dark gray for no tasks
+    return `hsla(${baseHue}, 20%, 8%, 0.4)`; // Very subtle for no tasks
   }
   
-  // Progressive color calculation
-  const saturation = Math.min(60 + taskCount * 10, 90);
-  let lightness = Math.max(85 - taskCount * 8, 25);
+  // Only darken when Pomodoro is completed, not just when tasks are added
+  const baseSaturation = 60;
+  const baseLightness = hasCompletedPomodoros ? 12 : 18; // Darker only with completed Pomodoros
+  const alpha = 0.6 + (taskCount * 0.1); // Increase opacity with more tasks
   
-  // Make color darker if there are completed Pomodoros
-  if (hasCompletedPomodoros) {
-    lightness = Math.max(lightness - 20, 15);
-  }
-  
-  return `hsl(${baseHue}, ${saturation}%, ${lightness}%)`;
+  return `hsla(${baseHue}, ${baseSaturation}%, ${baseLightness}%, ${Math.min(alpha, 0.9)})`;
 };
 
 export const getHeatmapColor = (taskCount: number, theme: ColorTheme): string => {

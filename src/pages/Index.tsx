@@ -186,10 +186,10 @@ const Index = () => {
   };
 
   return (
-    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white p-4">
-      <div className="max-w-7xl mx-auto">
-        {/* Header */}
-        <div className={`flex items-center justify-between mb-8 focus-mode-transition ${
+    <div className="min-h-screen bg-gradient-to-br from-slate-950 via-gray-900 to-slate-900 text-white">
+      <div className="container mx-auto px-6 py-8 max-w-7xl">
+        {/* Header with improved typography */}
+        <div className={`flex items-center justify-between mb-12 focus-mode-transition ${
           focusMode ? 'animate-slide-in-center' : 'animate-fade-in'
         }`}>
           <TimeDisplay />
@@ -201,7 +201,7 @@ const Index = () => {
             />
             <button
               onClick={() => setShowKeyboardShortcuts(!showKeyboardShortcuts)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-blue-500/30"
               title="Keyboard Shortcuts (Ctrl+/)"
             >
               <Keyboard size={16} />
@@ -209,35 +209,42 @@ const Index = () => {
             </button>
             <button
               onClick={() => setShowSettings(!showSettings)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 bg-slate-800/40 hover:bg-slate-700/50 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-slate-700/30 hover:border-violet-500/30"
             >
               <Settings size={16} />
               <span className="text-sm hidden sm:inline">Settings</span>
             </button>
             <button
               onClick={() => setFocusMode(!focusMode)}
-              className="flex items-center gap-2 px-4 py-2 bg-slate-800/50 hover:bg-slate-700/60 backdrop-blur-sm rounded-lg transition-all hover:scale-105"
+              className="flex items-center gap-2 px-4 py-2 bg-blue-600/20 hover:bg-blue-600/30 backdrop-blur-md rounded-xl transition-all duration-300 hover:scale-105 border border-blue-500/30 hover:border-blue-400/50"
             >
               {focusMode ? <Eye size={16} /> : <EyeOff size={16} />}
-              <span className="text-sm">{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
+              <span className="text-sm font-medium">{focusMode ? 'Exit Focus' : 'Focus Mode'}</span>
             </button>
           </div>
         </div>
 
-        {/* Main Goal */}
-        <div className={`focus-mode-transition ${focusMode ? 'animate-slide-in-center' : ''}`}>
+        {/* Main Goal with enhanced prominence */}
+        <div className={`focus-mode-transition mb-8 ${focusMode ? 'animate-slide-in-center' : ''}`}>
           <MainGoal goal={appData.mainGoal} onUpdate={updateMainGoal} />
         </div>
 
-        {/* Main Content */}
-        <div className={`grid grid-cols-1 gap-8 focus-mode-transition ${
-          focusMode ? 'lg:grid-cols-1' : 'lg:grid-cols-4'
+        {/* Grid Layout with 12-column system */}
+        <div className={`grid gap-8 focus-mode-transition ${
+          focusMode ? 'grid-cols-1' : 'grid-cols-12'
         }`}>
-          {/* Left Column - Task Input and Session Grid */}
-          <div className={`space-y-6 focus-mode-transition ${
-            focusMode ? 'col-span-1 animate-slide-in-center' : 'lg:col-span-3'
+          {/* Left Column - Tasks (8 columns in normal mode) */}
+          <div className={`space-y-8 focus-mode-transition ${
+            focusMode ? 'col-span-1 animate-slide-in-center' : 'col-span-8'
           }`}>
+            {/* Today's Tasks with enhanced header */}
             <div className="animate-pop-in">
+              <div className="mb-6">
+                <h1 className="text-3xl font-bold bg-gradient-to-r from-blue-400 to-violet-400 bg-clip-text text-transparent mb-2">
+                  Today's Tasks
+                </h1>
+                <div className="w-24 h-1 bg-gradient-to-r from-blue-500 to-violet-500 rounded-full"></div>
+              </div>
               <TaskInput 
                 onAddTask={addTask} 
                 tasks={getTodaysTasks()} 
@@ -245,7 +252,15 @@ const Index = () => {
                 onStartPomodoro={startPomodoroForTask}
               />
             </div>
+
+            {/* Sessions with enhanced header */}
             <div className="animate-pop-in" style={{ animationDelay: '0.1s' }}>
+              <div className="mb-6">
+                <h2 className="text-2xl font-bold bg-gradient-to-r from-amber-400 to-orange-400 bg-clip-text text-transparent mb-2">
+                  Today's Sessions
+                </h2>
+                <div className="w-20 h-1 bg-gradient-to-r from-amber-500 to-orange-500 rounded-full"></div>
+              </div>
               <SessionGrid 
                 tasks={getTodaysTasks()} 
                 colorTheme={appData.colorTheme}
@@ -254,6 +269,7 @@ const Index = () => {
                 onUpdateTargets={updateSessionTargets}
               />
             </div>
+
             {!focusMode && (
               <div className="animate-pop-in" style={{ animationDelay: '0.2s' }}>
                 <MonthlyHeatmap tasks={appData.tasks} colorTheme={appData.colorTheme} />
@@ -261,9 +277,9 @@ const Index = () => {
             )}
           </div>
 
-          {/* Right Column - Stats Panel */}
+          {/* Right Column - Stats Panel (4 columns in normal mode) */}
           {!focusMode && (
-            <div className="lg:col-span-1 space-y-6">
+            <div className="col-span-4 space-y-6">
               <div className="animate-pop-in" style={{ animationDelay: '0.3s' }}>
                 <StatsPanel 
                   streak={appData.streak}
@@ -275,7 +291,7 @@ const Index = () => {
           )}
         </div>
 
-        {/* Settings Panel */}
+        {/* Settings and modals remain the same */}
         {showSettings && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
             <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
@@ -336,7 +352,6 @@ const Index = () => {
           </div>
         )}
 
-        {/* Keyboard Shortcuts Modal */}
         {showKeyboardShortcuts && (
           <div className="fixed inset-0 bg-black/50 backdrop-blur-sm flex items-center justify-center z-40 animate-fade-in">
             <div className="bg-slate-800/90 backdrop-blur-md border border-slate-600/50 rounded-xl p-6 max-w-md w-full mx-4 animate-scale-in">
